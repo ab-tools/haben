@@ -158,6 +158,8 @@ button.nav-foot-link { width: 100%; background: none; border: 0; font: inherit; 
 .page-head > .actions, .page-head > .field { align-self: flex-end; }
 .page-head .eyebrow { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Knopfzeilen (#394, docs/entwicklung.md): Hauptaktion zuletzt im Markup; im Dialog rechtsbündig, sonst an der Kante der Felder */
+dialog .form-footer { justify-content: flex-end; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 /* Kachel als Link (Übersicht): sieht aus wie eine Karte, der Rahmen zeigt beim Überfahren, dass sie klickbar ist */
 .card-link { color: inherit; text-decoration: none; }
@@ -574,6 +576,8 @@ fieldset.card > legend + * { clear: both; }
   .page-head .actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
   .page-head .actions > .btn { flex: 1 1 auto; justify-content: center; }
   .page-head .actions > .field { flex: 1 1 140px; }
+  /* Knopfzeilen: Knöpfe füllen die Zeile, die Hauptaktion steht rechts im Daumenbereich; kleine Knöpfe in Tabellen bleiben */
+  .actions > .btn:not(.btn-sm) { flex: 1 1 auto; }
   /* Kacheln: zwei Spalten, kleinere Zahlen, letzte allein über die volle Breite */
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .kpi-grid > :last-child:nth-child(odd) { grid-column: 1 / -1; }
