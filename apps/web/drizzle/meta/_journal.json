@@ -1142,6 +1142,27 @@
       "when": 1794153660213,
       "tag": "0162_artikelnummer",
       "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1794158676199,
+      "tag": "0163_briefkopf_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1794158676833,
+      "tag": "0164_briefkopf_profile_trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1794158677577,
+      "tag": "0165_firma_akzentfarbe_entfernt",
+      "breakpoints": true
     }
   ]
 }

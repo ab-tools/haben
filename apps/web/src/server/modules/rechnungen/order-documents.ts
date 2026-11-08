@@ -1,9 +1,9 @@
 import { UserError } from "../../errors.ts";
 import { buildConfirmationPdf, buildDeliveryNotePdf, type Buyer, type OrderReferences, type Seller } from "@haben/einvoice";
-import type { UnitLabel } from "@haben/core";
+import type { DesignSnapshot, UnitLabel } from "@haben/core";
 import { asc, eq } from "drizzle-orm";
 import { db, schema } from "../../db/index.ts";
-import { loadCompany, loadLetterhead } from "../stammdaten/index.ts";
+import { letterheadOf, loadCompany } from "../stammdaten/index.ts";
 import { withCurrentLegalInfo } from "./invoices.ts";
 import { quoteChoices } from "./quote-choices.ts";
 import { documentReferences, type ReferenceColumns } from "./order-references.ts";
@@ -38,7 +38,7 @@ export async function confirmationPdf(quoteId: string) {
     choices,
     withPlan: quote.paymentPlanInConfirmation,
   });
-  const pdf = buildConfirmationPdf({ ...doc, ...(await loadLetterhead()) }, today(quote.decidedAt));
+  const pdf = buildConfirmationPdf({ ...doc, ...(await letterheadOf(quote.design)) }, today(quote.decidedAt));
   return { pdf, filename: `${quote.language === "en" ? "Order-confirmation" : "Auftragsbestaetigung"}-${quote.number}.pdf` };
 }
 
@@ -50,6 +50,7 @@ interface DeliverySource {
   seller: Seller;
   buyer: Buyer;
   language: "de" | "en";
+  design: DesignSnapshot | null;
   lines: { description: string; detail: string; itemNumber: string; quantity: number; unit: string }[];
   /** Bestellnummer des Kunden und eigene Auftragsnummer; die Lieferscheinnummer nennt der Lieferschein nicht noch einmal */
   references: OrderReferences;
@@ -67,6 +68,7 @@ async function deliverySource(source: "angebot" | "rechnung", id: string): Promi
       seller: quote.seller,
       buyer: quote.buyer,
       language: quote.language,
+      design: quote.design,
       lines: orderLines(lines, choices),
       references: orderReferencesOf(quote),
     };
@@ -84,6 +86,7 @@ async function deliverySource(source: "angebot" | "rechnung", id: string): Promi
     seller: invoice.seller,
     buyer: invoice.buyer,
     language: invoice.language,
+    design: invoice.design,
     // Abzüge einer Schlussrechnung sind keine Lieferung
     lines: lines.filter((l) => !l.deductionOf),
     references: orderReferencesOf(invoice),
@@ -98,7 +101,7 @@ function orderReferencesOf(row: ReferenceColumns): OrderReferences {
 /** Lieferschein zu einem angenommenen Angebot oder einer festgeschriebenen Rechnung */
 export async function deliveryNotePdf(source: "angebot" | "rechnung", id: string) {
   const base = await deliverySource(source, id);
-  const letterhead = await loadLetterhead();
+  const letterhead = await letterheadOf(base.design);
   const pdf = buildDeliveryNotePdf({
     reference: { kind: source, number: base.number, issueDate: base.issueDate },
     deliveryDate: base.deliveryDate,

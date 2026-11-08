@@ -43,7 +43,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { loadCompany, NO_RATE, resolveExchangeRate, sellerIssues, versteuerungForYear, type Company, type RateFields } from "../stammdaten/index.ts";
 import type { Contact } from "../stammdaten/index.ts";
-import { loadLetterhead } from "../stammdaten/index.ts";
+import { currentLook, keepLook } from "../stammdaten/index.ts";
 import { invoiceLosses, invoicePayments, invoiceWrittenOff } from "../bank/index.ts";
 import { withActor } from "../../db/actor.ts";
 import { db, schema, type Db, type Tx } from "../../db/index.ts";
@@ -1059,10 +1059,12 @@ async function finalizeDraft(tx: Tx, id: string): Promise<Invoice> {
     corrects ? { number: corrects.number!, issueDate: corrects.issueDate } : null,
     await deductedRefs(lines, tx),
   );
-  const rendered = await buildEInvoice({ ...doc, ...(await loadLetterhead()) });
+  const look = await currentLook();
+  const rendered = await buildEInvoice({ ...doc, ...look.letterhead });
   const now = new Date();
 
   await takeNumber(tx, "rechnung", circle, counter);
+  await keepLook(tx, look);
   const [finalized] = await tx
     .update(schema.invoices)
     .set({
@@ -1080,6 +1082,7 @@ async function finalizeDraft(tx: Tx, id: string): Promise<Invoice> {
       pdfSha256: sha256(rendered.pdf),
       xml: rendered.xml,
       xmlSha256: sha256(rendered.xml),
+      design: look.snapshot,
       lockedAt: now,
       updatedAt: now,
     })

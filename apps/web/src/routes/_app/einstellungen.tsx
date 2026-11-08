@@ -24,6 +24,7 @@ import { InboxCard } from "../../components/InboxCard.tsx";
 import { IntegrityCard } from "../../components/IntegrityCard.tsx";
 import { AccentColorCard } from "../../components/AccentColorCard.tsx";
 import { LogoCard } from "../../components/LogoCard.tsx";
+import { LayoutsCard, LetterheadOptionsCard } from "../../components/GestaltungCards.tsx";
 import { CustomerNumberCard } from "../../components/CustomerNumberCard.tsx";
 import { NumberFormatCard } from "../../components/NumberFormatCard.tsx";
 import { NumberingCard } from "../../components/NumberingCard.tsx";
@@ -54,7 +55,7 @@ import { getExportYears } from "../../server/functions/export.ts";
 import { getNumbering } from "../../server/functions/invoices.ts";
 import { getInbox } from "../../server/functions/inbox.ts";
 import { getChainHead } from "../../server/functions/integrity.ts";
-import { getLogo } from "../../server/functions/logo.ts";
+import { getLetterheadDesign, getLogo } from "../../server/functions/logo.ts";
 import { getMailSettings } from "../../server/functions/mail.ts";
 import { getMcpSettings } from "../../server/functions/mcp.ts";
 import { getZugaenge } from "../../server/functions/zugang.ts";
@@ -71,6 +72,7 @@ export const Route = createFileRoute("/_app/einstellungen")({
       eric,
       mail,
       logo,
+      design,
       inbox,
       exportYears,
       datev,
@@ -89,6 +91,7 @@ export const Route = createFileRoute("/_app/einstellungen")({
       getEricStatus(),
       getMailSettings(),
       getLogo(),
+      getLetterheadDesign(),
       getInbox(),
       getExportYears(),
       getDatevNumbers(),
@@ -109,6 +112,7 @@ export const Route = createFileRoute("/_app/einstellungen")({
       eric,
       mail,
       logo,
+      design,
       inbox,
       exportYears,
       datev,
@@ -129,7 +133,7 @@ export const Route = createFileRoute("/_app/einstellungen")({
 });
 
 function SettingsPage() {
-  const { company, numbering, logo, mail, inbox, exportYears, datev, chainHead, backup, mcp, rates, enableBanking, customPages, zugaenge, extraction } =
+  const { company, numbering, logo, design, mail, inbox, exportYears, datev, chainHead, backup, mcp, rates, enableBanking, customPages, zugaenge, extraction } =
     Route.useLoaderData();
   const { bereich = "firma" } = Route.useSearch();
   const area = SETTINGS_AREAS.find((a) => a.id === bereich)!;
@@ -169,8 +173,14 @@ function SettingsPage() {
               />
               <PlanTemplatesCard templates={company.paymentPlanTemplates} />
               <CustomerNumberCard format={company.customerNumberFormat} next={company.customerNumberNext} date={numbering.invoice.date} />
+            </>
+          )}
+          {bereich === "gestaltung" && (
+            <>
               <LogoCard info={logo} />
-              <AccentColorCard color={company.accentColor} />
+              <AccentColorCard color={design.accent} />
+              <LetterheadOptionsCard design={design} />
+              <LayoutsCard design={design} />
             </>
           )}
           {bereich === "elster" && (

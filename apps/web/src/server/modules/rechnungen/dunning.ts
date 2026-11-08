@@ -8,7 +8,7 @@ import { loadCompany } from "../stammdaten/index.ts";
 import { withActor } from "../../db/actor.ts";
 import { db, schema, type Db, type Tx } from "../../db/index.ts";
 import { listInvoices, withCurrentLegalInfo } from "./invoices.ts";
-import { loadLetterhead } from "../stammdaten/index.ts";
+import { letterheadOf } from "../stammdaten/index.ts";
 
 export class DunningError extends UserError {}
 
@@ -143,7 +143,7 @@ async function checkedInput(input: DunningInput, today: string) {
   if (input.interest && company.dunning.baseRate === null) {
     throw new DunningError("Für Verzugszinsen bitte zuerst den Basiszinssatz in den Einstellungen eintragen.");
   }
-  return { open: listed.open, company, letterhead: await loadLetterhead() };
+  return { open: listed.open, company };
 }
 
 /**
@@ -154,7 +154,7 @@ async function dunningDocument(
   q: Db | Tx,
   input: DunningInput,
   today: string,
-  { open, company, letterhead }: Awaited<ReturnType<typeof checkedInput>>,
+  { open, company }: Awaited<ReturnType<typeof checkedInput>>,
   lock: boolean,
 ): Promise<DunningDocument> {
   const query = q.select().from(schema.invoices).where(eq(schema.invoices.id, input.invoiceId));
@@ -175,7 +175,8 @@ async function dunningDocument(
     );
   }
   return {
-    ...letterhead,
+    // Im Aussehen der gemahnten Rechnung, die Pflichtangaben darunter sind die heutigen
+    ...(await letterheadOf(invoice.design, q)),
     level: input.level,
     date: today,
     dueDate: input.dueDate,

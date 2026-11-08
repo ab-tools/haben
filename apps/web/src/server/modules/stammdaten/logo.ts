@@ -3,7 +3,7 @@ import { logoFormat, type Logo } from "@haben/einvoice";
 import { eq } from "drizzle-orm";
 import { createHash } from "node:crypto";
 import { withActor } from "../../db/actor.ts";
-import { db, schema } from "../../db/index.ts";
+import { db, schema, type Db, type Tx } from "../../db/index.ts";
 
 /** Firmenlogo für den Briefkopf von Rechnungen, Angeboten und Mahnungen */
 
@@ -13,6 +13,22 @@ export const MAX_LOGO_BYTES = 1024 * 1024;
 
 export async function loadLogo(): Promise<Logo | undefined> {
   const [row] = await db.select({ logo: schema.companyLogo.logo, format: schema.companyLogo.format }).from(schema.companyLogo);
+  return row ? { data: new Uint8Array(row.logo), format: row.format } : undefined;
+}
+
+export const logoHash = (logo: Logo): string => createHash("sha256").update(logo.data).digest("hex");
+
+/** Legt das Logo eines festgeschriebenen Belegs ab; dasselbe Bild steht nur einmal da */
+export async function keepLogo(tx: Tx, sha256: string, logo: Logo): Promise<void> {
+  await tx
+    .insert(schema.letterheadLogos)
+    .values({ sha256, logo: Buffer.from(logo.data), format: logo.format })
+    .onConflictDoNothing();
+}
+
+export async function loadKeptLogo(sha256: string, q: Db | Tx = db): Promise<Logo | undefined> {
+  const kept = schema.letterheadLogos;
+  const [row] = await q.select({ logo: kept.logo, format: kept.format }).from(kept).where(eq(kept.sha256, sha256));
   return row ? { data: new Uint8Array(row.logo), format: row.format } : undefined;
 }
 

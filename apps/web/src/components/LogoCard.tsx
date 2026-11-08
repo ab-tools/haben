@@ -48,7 +48,7 @@ export function LogoCard({ info }: { info: Info }) {
     <section className="card" aria-labelledby="logo-heading">
       <h2 id="logo-heading">Logo</h2>
       <p className="small muted" style={{ margin: 0 }}>
-        Erscheint oben rechts im Briefkopf, höchstens 18 mm hoch und 60 mm breit. PNG (gern mit transparentem Hintergrund) oder JPEG, bis 1 MB. Schon
+        Erscheint oben im Briefkopf, Größe und Seite stellst du unter „Logo und Blatt“ ein. PNG (gern mit transparentem Hintergrund) oder JPEG, bis 1 MB. Schon
         festgeschriebene Belege behalten ihr PDF.
       </p>
       {info ? (
