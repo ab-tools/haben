@@ -346,9 +346,6 @@ function AccountSettings({ account, purposes, ledger }: { account: Data["account
       </span>
       <NoticeBanner notice={notice} />
       <div className="actions">
-        <button type="submit" className="btn btn-primary" disabled={busy || !name.trim()}>
-          Speichern
-        </button>
         <button
           type="button"
           className="btn"
@@ -360,6 +357,9 @@ function AccountSettings({ account, purposes, ledger }: { account: Data["account
           disabled={busy}
         >
           Abbrechen
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={busy || !name.trim()}>
+          Speichern
         </button>
       </div>
     </form>
@@ -471,6 +471,25 @@ function BankSync({ sync, result }: { sync: Sync; result: { ok: boolean; message
               {c.lastError && <span className="field-error">{c.lastError}</span>}
             </div>
             <div className="actions">
+              <button
+                type="button"
+                className="btn"
+                disabled={busy !== null}
+                onClick={() => {
+                  if (window.confirm(`Verbindung zu ${c.aspspName} trennen? Die abgerufenen Umsätze bleiben erhalten.`)) {
+                    void run(`x-${c.id}`, async () => {
+                      await disconnectFn({ data: c.id });
+                    });
+                  }
+                }}
+              >
+                Trennen
+              </button>
+              {sync.configured && (c.status !== "aktiv" || c.renewSoon) && (
+                <button type="button" className="btn" disabled={busy !== null} onClick={() => void renew(c.aspspName, c.psuType)}>
+                  Zustimmung erneuern
+                </button>
+              )}
               {canSync && (
                 <button
                   type="button"
@@ -489,25 +508,6 @@ function BankSync({ sync, result }: { sync: Sync; result: { ok: boolean; message
                   {busy === c.id ? "Rufe ab …" : "Jetzt abrufen"}
                 </button>
               )}
-              {sync.configured && (c.status !== "aktiv" || c.renewSoon) && (
-                <button type="button" className="btn" disabled={busy !== null} onClick={() => void renew(c.aspspName, c.psuType)}>
-                  Zustimmung erneuern
-                </button>
-              )}
-              <button
-                type="button"
-                className="btn"
-                disabled={busy !== null}
-                onClick={() => {
-                  if (window.confirm(`Verbindung zu ${c.aspspName} trennen? Die abgerufenen Umsätze bleiben erhalten.`)) {
-                    void run(`x-${c.id}`, async () => {
-                      await disconnectFn({ data: c.id });
-                    });
-                  }
-                }}
-              >
-                Trennen
-              </button>
             </div>
           </div>
         );
@@ -643,11 +643,11 @@ function ConnectForm({
         </div>
       )}
       <div className="actions">
-        <button type="submit" className="btn btn-primary" disabled={!bank || busy}>
-          {busy ? "Weiterleiten …" : "Weiter zur Bank"}
-        </button>
         <button type="button" className="btn" onClick={onCancel} disabled={busy}>
           Abbrechen
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={!bank || busy}>
+          {busy ? "Weiterleiten …" : "Weiter zur Bank"}
         </button>
       </div>
     </form>
@@ -1181,6 +1181,16 @@ function AllocationPanel({
           </label>
 
           <div className="actions">
+            {mode !== "other" && (
+              <button type="button" className="btn" onClick={() => setMode("other")} disabled={busy}>
+                Andere Rechnung
+              </button>
+            )}
+            {mode === "other" && best && (
+              <button type="button" className="btn" onClick={() => setMode("best")} disabled={busy}>
+                Vorschlag
+              </button>
+            )}
             <button
               ref={primaryButton}
               type="button"
@@ -1197,16 +1207,6 @@ function AllocationPanel({
             >
               {mode === "direct" ? "Buchen" : skontoRest !== 0 ? `Zuordnen, Rest ${formatEuro(Math.abs(skontoRest))} als Skonto` : "Zuordnen"}
             </button>
-            {mode !== "other" && (
-              <button type="button" className="btn" onClick={() => setMode("other")} disabled={busy}>
-                Andere Rechnung
-              </button>
-            )}
-            {mode === "other" && best && (
-              <button type="button" className="btn" onClick={() => setMode("best")} disabled={busy}>
-                Vorschlag
-              </button>
-            )}
           </div>
           {feeRest !== 0 && (
             <div className="stack" style={{ gap: 8 }}>
@@ -1468,11 +1468,11 @@ function SplitForm({
         </span>
       </div>
       <div className="actions">
-        <button type="submit" className="btn btn-primary" style={{ flexGrow: 1 }} disabled={busy || !complete}>
-          Aufteilen und buchen
-        </button>
         <button type="button" className="btn" onClick={onCancel} disabled={busy}>
           Abbrechen
+        </button>
+        <button type="submit" className="btn btn-primary" style={{ flexGrow: 1 }} disabled={busy || !complete}>
+          Aufteilen und buchen
         </button>
       </div>
     </form>

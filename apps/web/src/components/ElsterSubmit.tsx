@@ -135,11 +135,11 @@ export function ElsterSubmit({
       )}
       <NoticeBanner notice={notice} />
       <div className="actions">
-        <button type="submit" className="btn btn-primary" disabled={busy || !ready || !setup.certificate || pin.length === 0} style={{ flexGrow: 1 }}>
-          {busy ? "Läuft …" : confirming ? "Jetzt verbindlich senden" : live ? "Prüfen und senden" : "Prüfen und testweise senden"}
-        </button>
         <button type="button" className="btn" disabled={busy || !ready} onClick={() => void onSubmit("validate")}>
           Nur prüfen
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={busy || !ready || !setup.certificate || pin.length === 0} style={{ flexGrow: 1 }}>
+          {busy ? "Läuft …" : confirming ? "Jetzt verbindlich senden" : live ? "Prüfen und senden" : "Prüfen und testweise senden"}
         </button>
       </div>
       <p className="small muted" style={{ margin: 0 }}>

@@ -99,14 +99,14 @@ export function DatevEroeffnung({ data }: { data: Data }) {
       )}
       {buchbar && (
         <div className="actions">
-          <button type="button" className="btn btn-primary" onClick={onBook} disabled={busy}>
-            {confirming ? "Jetzt buchen" : "Eröffnung buchen"}
-          </button>
           {confirming && (
             <button type="button" className="btn" onClick={() => setConfirming(false)} disabled={busy}>
               Abbrechen
             </button>
           )}
+          <button type="button" className="btn btn-primary" onClick={onBook} disabled={busy}>
+            {confirming ? "Jetzt buchen" : "Eröffnung buchen"}
+          </button>
         </div>
       )}
       <NoticeBanner notice={notice} />
